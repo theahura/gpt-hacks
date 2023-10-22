@@ -27,6 +27,9 @@ pip install -r requirements.txt
 
 # Sets up env. Queries the user for an OPENAI_API_KEY token, and writes it to
 # the .env file.
+
+# For macOS, .env files are not read and must be set by export and source .env
+
 echo "Setting up env."
 touch .env
 echo "Please provide your OPENAI_API_KEY:"
