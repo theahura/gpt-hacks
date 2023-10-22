@@ -2,7 +2,7 @@
 Main.
 """
 import json
-from typing import List, TypedDict
+from typing import Callable, List, TypedDict, Optional, Tuple
 
 import llm_io
 import prompt_manipulation
@@ -28,13 +28,16 @@ def get_subtasks(task: str) -> List[Subtask]:
 ''')
 
   response, usage = llm_io.call_gpt([llm_io.to_gpt_message("user", prompt)])
-  return json.loads(response['message']['content'])['subtasks']
+  return json.loads(response['content'])['subtasks']
 
 
-print(response)
+get_subtasks(task)
 
-subtasks = json.loads(response['message']['content'])['subtasks']
-print(subtasks)
+
+def validate_task(task: str, solution: str,
+                  context: Callable[..., str]) -> Tuple[bool, Optional[str]]:
+  pass
+
 
 # for subtask in subtasks:
 #   print(subtask)
