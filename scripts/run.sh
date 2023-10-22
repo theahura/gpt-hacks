@@ -7,6 +7,6 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/.."
 source ./env/bin/activate
 
 # Start the backend.
-python3 src/main.py
+python3 src/main.py "$@"
 
 popd
