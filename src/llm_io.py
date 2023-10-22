@@ -1,18 +1,21 @@
 """
 Contains base functions for calling out to the openai api.
 """
-from typing import TypedDict, List, Optional, Tuple
+from typing import Any, cast, TypedDict, List, Optional, Tuple
 
 import os
 import openai
-
-import prompt_manipulation
 
 
 class Message(TypedDict):
   role: str
   content: str
-  finish_reason: str
+  finish_reason: Optional[str]
+
+
+class InputMessage(TypedDict):
+  role: str
+  content: str
 
 
 class Response(TypedDict):
@@ -31,7 +34,7 @@ class GPTChatCompletionResponse(TypedDict):
   object: str
   created: int
   model: str
-  choices: List[Message]
+  choices: List[Response]
   usage: GPTChatCompletionUsage
 
 
@@ -40,13 +43,17 @@ def get_access_token():
   return os.getenv("OPENAI_API_KEY")
 
 
-def call_gpt(messages: List[Message],
-             model: str) -> Tuple[Message, GPTChatCompletionUsage]:
+def call_gpt(
+    messages: List[InputMessage],
+    model: Optional[str] = 'gpt-3.5-turbo'
+) -> Tuple[Message, GPTChatCompletionUsage]:
   """Calls OpenAI API with the above messages"""
   openai.api_key = get_access_token()
-  completion = openai.ChatCompletion.create(model=model, messages=messages)
-  return completion.choices[0], completion.usage
+  response = cast(Any,
+                  openai.ChatCompletion.create(model=model, messages=messages))
+  completion = cast(GPTChatCompletionResponse, response.to_dict_recursive())
+  return completion['choices'][0]['message'], completion['usage']
 
 
-def to_gpt_message(role: str, content: str) -> Message:
+def to_gpt_message(role: str, content: str) -> InputMessage:
   return {'role': "user", 'content': content}
