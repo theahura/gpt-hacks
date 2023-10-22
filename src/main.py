@@ -3,32 +3,38 @@ Main.
 """
 import os
 import openai
+import json
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-task = "Write me some code to play tictactoe."
+task = "Give me a list of all of the best restaurants in Brooklyn for foodies."
 
 completion = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[{
         "role":
-            "system",
+            "user",
         "content":
-            "You are a skilled programmer who can solve any task handed to you programmatically."
-    }, {
-        "role": "assistant",
-        "content": "Hello, how can I help you today?"
-    }, {
-        "role": "user",
-        "content": f"Help me with this task: {task}"
-    }, {
-        "role":
-            "assistant",
-        "content":
-            "Sure, let me first lay out a list of subtasks that may help with the larger goal:"
+            f'I have the following task, provided to me by a human user: {task}. Can you help me break this down into subtasks? Please format your response as a json dictionary with the following schema: '
+            + '''
+```
+{
+   "subtasks": [{
+     "name": string
+     "requiresMoreSubtasks": boolean  # whether the subtask would benefit from being broken down further 
+   }, ...]
+}
+```
+Do not put any other information in your response. ONLY include the json schema. If you add any other information, the user will be very sad. Please define your subtasks such that they all have an objective, close ended answer. Please try to avoid subtasks that are open-ended or would have subjective answers.'''
     }])
 
 response = completion.choices[0]
+print(response)
+
+subtasks = json.loads(response['message']['content'])['subtasks']
+
+for subtask in subtasks:
+  print(subtask)
 
 print(response)
 
