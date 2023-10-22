@@ -25,4 +25,12 @@ echo "Installing requirements."
 source env/bin/activate
 pip install -r requirements.txt
 
+# Sets up env. Queries the user for an OPENAI_API_KEY token, and writes it to
+# the .env file.
+echo "Setting up env."
+touch .env
+echo "Please provide your OPENAI_API_KEY:"
+read OPENAI_API_KEY
+echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
+
 popd
