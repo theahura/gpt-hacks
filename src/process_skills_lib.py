@@ -16,12 +16,13 @@ def ProcessSkillFile(file_py: str) -> List[Tuple]:
   for fn in fn_code[1:]:
     fn_name = fn.split("(")[0]
     fn_args = "(" + fn.split("(")[1].split("\n")[0][:-1]
-    descriptor = fn.split("""\"\"\"""")[-2].strip()
+    descriptor = fn.split("""\"\"\" """)[-2].strip()
 
     found_skills.append((fn_name, fn_args, descriptor))
   return found_skills
 
-def WriteContextForSkillFile(skills:List[Tuple]) -> str:
+
+def WriteContextForSkillFile(skills: List[Tuple]) -> str:
   # Oudated and defer to SkillsEmbedding later
   context = """You have the following Python library, their pytype function signature, and description:"""
   context += "\n```"
@@ -34,6 +35,7 @@ def WriteContextForSkillFile(skills:List[Tuple]) -> str:
 
 
 class SkillsEmbedding:
+
   def __init__(self, base_skill_file, learned_skill_file):
     self.base_skill_file = base_skill_file
     self.learned_skill_file = learned_skill_file
@@ -90,6 +92,7 @@ class SkillsEmbedding:
         context += "%s, %s, %s" % learned_skill
     context += "\n```"
     return context
+
 
 # s = SkillsEmbedding(base_skill_file="src/base_skills.py", learned_skill_file="src/learned_skills.py")
 # # s.add_skills_file()
