@@ -1,10 +1,12 @@
 """
 Contains base functions for calling out to the openai api.
 """
+from typing import TypedDict, List, Optional, Tuple
+
 import os
 import openai
 
-from typing import TypedDict, List, Optional, Tuple
+import prompt_manipulation
 
 
 class Message(TypedDict):
@@ -33,24 +35,18 @@ class GPTChatCompletionResponse(TypedDict):
   usage: GPTChatCompletionUsage
 
 
-def GetAccessTokens():
+def get_access_token():
   # Returns a valid access token from the OS Environment
   return os.getenv("OPENAI_API_KEY")
 
 
-def _call_gpt(messages: List[Message],
-              model: str) -> Tuple[Message, GPTChatCompletionUsage]:
+def call_gpt(messages: List[Message],
+             model: str) -> Tuple[Message, GPTChatCompletionUsage]:
   """Calls OpenAI API with the above messages"""
-  openai.api_key = GetAccessTokens()
+  openai.api_key = get_access_token()
   completion = openai.ChatCompletion.create(model=model, messages=messages)
   return completion.choices[0], completion.usage
 
 
-def query(prompt: str,
-          json_template: Optional[str] = None,
-          model: Optional[str] = "gpt-3.5-turbo"):
-
-  if json_template is not None:
-    prompt += f'Please format your response as a json dictionary with the following schema: ```{json_template}```. Do not put any other information in your response. ONLY include the json schema. If you add any other information, the user will be very sad.'
-
-  return _call_gpt([{'role': "user", 'content': prompt}], model)
+def to_gpt_message(role: str, content: str) -> Message:
+  return {'role': "user", 'content': content}

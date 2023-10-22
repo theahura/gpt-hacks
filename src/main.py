@@ -2,21 +2,34 @@
 Main.
 """
 import json
+from typing import List, TypedDict
+
 import llm_io
+import prompt_manipulation
 
 task = "Give me a list of all of the best restaurants in Brooklyn for foodies."
 
-response, usage = llm_io.query(
-    prompt=
-    'I have the following task, provided to me by a human user: {task}. Can you help me break this down into subtasks?',
-    json_template='''
+
+class Subtask(TypedDict):
+  task: str
+  requiresMoreSubtasks: bool
+
+
+def get_subtasks(task: str) -> List[Subtask]:
+  prompt = f'I have the following task, provided to me by a human user: {task}. Can you help me break this down into subtasks?'
+  prompt = prompt_manipulation.add_json_template(prompt,
+                                                 template='''
 {
   "subtasks": [{
-    "name": string
+    "task": string
     "requiresMoreSubtasks": boolean  # whether the subtask would benefit from being broken down further
   }, ...]
 }
 ''')
+
+  response, usage = llm_io.call_gpt([llm_io.to_gpt_message("user", prompt)])
+  return json.loads(response['message']['content'])['subtasks']
+
 
 print(response)
 
