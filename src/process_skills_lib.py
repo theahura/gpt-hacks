@@ -4,6 +4,7 @@ from typing import TypedDict, List, Optional, Tuple
 
 import chromadb
 
+
 def ProcessSkillFile(file_py: str) -> List[Tuple]:
   found_skills = []
   with open(file_py, "r") as f:
@@ -13,12 +14,13 @@ def ProcessSkillFile(file_py: str) -> List[Tuple]:
   for fn in fn_code[1:]:
     fn_name = fn.split("(")[0]
     fn_args = "(" + fn.split("(")[1].split("\n")[0][:-1]
-    descriptor = fn.split("""\"\"\"""")[1].strip()
+    descriptor = fn.split("""\"\"\" """)[1].strip()
 
     found_skills.append((fn_name, fn_args, descriptor))
   return found_skills
 
-def WriteContextForSkillFile(skills:List[Tuple]) -> str:
+
+def WriteContextForSkillFile(skills: List[Tuple]) -> str:
   context = """You have the following Python library, their pytype function signature, and description:"""
   context += "\n```"
   for skill in skills:
@@ -28,10 +30,13 @@ def WriteContextForSkillFile(skills:List[Tuple]) -> str:
 
   return context
 
+
 class SkillsEmbedding:
+
   def __init__(self, base_skill_file=None, learned_skill_files=None):
     self.chroma_client = chromadb.Client()
-    self.collection = self.chroma_client.create_collection(name="skill_library")
+    self.collection = self.chroma_client.create_collection(
+        name="skill_library")
 
     if base_skill_file:
       self.base_skills = ProcessSkillFile(base_skill_file)
@@ -47,8 +52,6 @@ class SkillsEmbedding:
 
     self.skills = self.base_skills + self.learned_skills
 
-
-
   def add_skills_file(self, skill_file):
     # fn_name, fn_args, descriptor
     skills = ProcessSkillFile(skill_file)
@@ -59,7 +62,8 @@ class SkillsEmbedding:
   def search(self, skill_description, n_results):
     if skill_description is not list:
       skill_description = [skill_description]
-    res = self.collection.query(query_texts=skill_description, n_results=n_results)
+    res = self.collection.query(query_texts=skill_description,
+                                n_results=n_results)
     return res['ids']
 
   def construct_skill_context(self, learned_ids):
@@ -70,10 +74,8 @@ class SkillsEmbedding:
       context += "%s, %s, %s" % skill
 
     # Write the selected learned skills
-    
 
     context += "\n```"
-
 
 
 s = SkillsEmbedding()
