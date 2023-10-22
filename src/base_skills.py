@@ -15,8 +15,10 @@ def GetListOfRestaurantsAt(gps_coordinate: Tuple[float, float]) -> List[str]:
     "BestPub-%s" % location,
     "BestBurger-%s" % location]
 
+
 def GetGPSCoordinateOf(name: str) -> List[Tuple[float, float]]:
   """Returns a list of GPS coordinates for cities with a particular name."""
+
 
 def GetWeatherDescriptionAt(gps_coordinate: Tuple[float, float]) -> str:
   """Returns a summary describing the most recent weather conditions at a GPS coordinate.

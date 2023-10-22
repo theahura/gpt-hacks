@@ -2,6 +2,8 @@
 """
 from typing import TypedDict, List, Optional, Tuple
 
+import os
+
 import chromadb
 
 def ProcessSkillFile(file_py: str) -> List[Tuple]:
@@ -29,16 +31,13 @@ def WriteContextForSkillFile(skills:List[Tuple]) -> str:
   return context
 
 class SkillsEmbedding:
-  def __init__(self, base_skill_file=None, learned_skill_files=None):
+  def __init__(self, base_skill_file, learned_skill_files=None):
     self.chroma_client = chromadb.Client()
     self.collection = self.chroma_client.create_collection(name="skill_library")
+    
+    self.base_skills = ProcessSkillFile(base_skill_file)
 
-    if base_skill_file:
-      self.base_skills = ProcessSkillFile(base_skill_file)
-    else:
-      self.base_skills = []
-
-    if learned_skills:
+    if learned_skill_files:
       self.learned_skills = ProcessSkillFile(learned_skill_files)
       # Embed only learned skills
       self.add_skills_file(learned_skill_files)
@@ -46,8 +45,6 @@ class SkillsEmbedding:
       self.learned_skills = []
 
     self.skills = self.base_skills + self.learned_skills
-
-
 
   def add_skills_file(self, skill_file):
     # fn_name, fn_args, descriptor
@@ -62,7 +59,15 @@ class SkillsEmbedding:
     res = self.collection.query(query_texts=skill_description, n_results=n_results)
     return res['ids']
 
+  # def write_skill_to_file(self, skill_file, skill_tuple):
+  #   # skill_tuple is of the form [skill_name, skill_description, code_block]
+  #   code_block = skill_tuple[2]
+  #   code_block.split("->")[1].split(":")[1]
+  #   with open(skill_file, 'a') as f:
+  #     f.write()
+
   def construct_skill_context(self, learned_ids):
+    context = ""
     # Writes the base skills and then learned skills
     context += "\n```"
     for skill in self.base_skills:
@@ -70,12 +75,16 @@ class SkillsEmbedding:
       context += "%s, %s, %s" % skill
 
     # Write the selected learned skills
-    
-
+    learned_set = set(learned_ids)
+    for learned_skill in self.learned_skills:
+      if learned_skill[0] in learned_set:
+        # found skill add it to context
+        context += "\n"
+        context += "%s, %s, %s" % learned_skill
     context += "\n```"
+    return context
 
-
-
-s = SkillsEmbedding()
-s.add_skills_file("src/base_skills.py")
+s = SkillsEmbedding(base_skill_file="src/base_skills.py")
+# s.add_skills_file()
 s.search("Need Information about Restaurants", 2)
+print(s.construct_skill_context([]))
