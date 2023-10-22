@@ -3,11 +3,11 @@
 This is not src code, but the list of available
 task primitives that CodeGen may call through ChromeDB
 """
-from typing import List
+from typing import List, Any, Tuple
 
 
-def GetListOfRestaurantsAt(location: str) -> List[str]:
-  """Returns a list of restraurants near location.
+def GetListOfRestaurantsAt(gps_coordinate: Tuple[float, float]) -> List[str]:
+  """Returns a list of restaurants near gps_coordinate.
   """
   return [
     "BestPizza-%s" % location,
@@ -15,11 +15,18 @@ def GetListOfRestaurantsAt(location: str) -> List[str]:
     "BestPub-%s" % location,
     "BestBurger-%s" % location]
 
-def QueryClosestWikipediaMatch(article_name: str) -> List[str]:
-  """Returns a list of Wikipedia articles that are a close match to article_name.
+def GetGPSCoordinateOf(name: str) -> List[Tuple[float, float]]:
+  """Returns a list of GPS coordinates for cities with a particular name."""
+
+def GetWeatherDescriptionAt(gps_coordinate: Tuple[float, float]) -> str:
+  """Returns a summary describing the most recent weather conditions at a GPS coordinate.
   """
-  return [
-    "History of %s" % article_name,
-    "List of Famous %s" % article_name,
-    "Early %s" % article_name
-  ]
+
+def AccessWikipediaArticle(article_name: str) -> str:
+  """Returns information about article_name's Wikipedia article."""
+  return "Wikipedia information about %s" % article_name
+
+# Under the hood this is running an LLM to answer question given article
+def AnswerQuestionFromArticle(article: str, question: str) -> Any:
+  """Answers a question using the Wikipedia article."""
+  return 100
